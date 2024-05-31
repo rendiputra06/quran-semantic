@@ -1,0 +1,101 @@
+[
+  {
+    "name": "Keutamaan ilmu",
+    "children": []
+  },
+  {
+    "name": "Majlis ilmu atau tempat pendidikan",
+    "children": [
+      {
+        "name": "Duduk dalam majlis ilmu",
+        "children": []
+      },
+      {
+        "name": "Memutus pembicaraan guru",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Menyampaikan ilmu",
+    "children": [
+      {
+        "name": "Yang hadir menyampaikan kepada yang tidak hadir",
+        "children": []
+      },
+      {
+        "name": "Hukum menuntut ilmu fardhu kifayah",
+        "children": []
+      },
+      {
+        "name": "Menyembunyikan ilmu",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Fatwa",
+    "children": [
+      {
+        "name": "Etika bertanya",
+        "children": [
+          {
+            "name": "Bertanya pada ahlinya",
+            "children": []
+          },
+          {
+            "name": "Berlebihan dalam bertanya",
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Etika menjawab",
+        "children": [
+          {
+            "name": "Mengarahkan penanya pada hal yang berfaedah",
+            "children": []
+          },
+          {
+            "name": "Menjawab dengan dalil perbuatan",
+            "children": [
+              {
+                "name": "Mmpi Yusuf as.",
+                "children": [
+                  {
+                    "name": "Level 5",
+                    "children": [
+                      {
+                        "name": "Level 6",
+                        "children": [
+                          {
+                            "name": "Qs.6:91",
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Jenis mimpi",
+        "children": [
+          {
+            "name": "Mimpii datangnya dari Allah",
+            "children": [
+              {
+                "name": "Mmpi Yusuf as.",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
