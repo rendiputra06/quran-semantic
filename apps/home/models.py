@@ -8,6 +8,7 @@ class Category(db.Model):
         'category.id'), nullable=True)
     children = db.relationship(
         'Category', backref=db.backref('parent', remote_side=[id]))
+    list_ayat = db.Column(db.Text, nullable=True)  # Menambahkan field list_ayat
 
     def __repr__(self):
         return f'<Category {self.name}>'
