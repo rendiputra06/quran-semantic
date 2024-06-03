@@ -31,6 +31,8 @@ def excel_to_hierarchy_db(file_path, sheet_name):
     # Membuat sub-dataframe yang dimulai dari kolom B dan melewati dua baris pertama
     df = df.iloc[2:, 1:]
 
+    ayat_data = []
+
     def build_hierarchy(df, parent_main_id):
         def add_children(df, parent_row, level, parent_id):
             if level > 5:
@@ -42,6 +44,7 @@ def excel_to_hierarchy_db(file_path, sheet_name):
                     child = Category(name=name, parent_id=parent_id)
                     session.add(child)
                     session.flush()  # Menyimpan child untuk mendapatkan id
+                    ayat_data.append(extract_special_data(i, child.id))
                     add_children(df, i, level + 1, child.id)
                 i += 1
 
@@ -49,7 +52,7 @@ def excel_to_hierarchy_db(file_path, sheet_name):
         while i < len(df):
             if pd.notna(df.iloc[i, 0]):
                 name = df.iloc[i, 0]
-                print(name)
+                print('nama kategori', name)
                 root = Category(name=name, parent_id=parent_main_id)
                 session.add(root)
                 session.flush()  # Menyimpan root untuk mendapatkan id
@@ -57,20 +60,16 @@ def excel_to_hierarchy_db(file_path, sheet_name):
             i += 1
         session.commit()
 
-    def extract_special_data(df):
+    def extract_special_data(posisi, id):
         special_data = {}
-        for i in range(len(df)):
-            row = df.iloc[i]
-            for col in range(6, len(row)):  # Mulai dari kolom ketujuh (index 6)
-                if pd.notna(row[col]):
-                    try:
-                        node_id = find_id_by_row(i)
-                        if node_id not in special_data:
-                            special_data[node_id] = []
-                        special_data[node_id].append(row[col])
-                    except ValueError as e:
-                        print(e)
-                        # Bisa juga menambahkan logika penanganan lebih lanjut di sini
+        row = df.iloc[posisi]
+        for col in range(6, len(row)):  # Mulai dari kolom ketujuh (index 6)
+            if pd.notna(row[col]):
+                # node_id = find_id_by_row(id)
+                if id not in special_data:
+                    special_data[id] = []
+                special_data[id].append(row[col])
+                print('baris dengan id = ', id, 'memiliki data', row[col])
         return special_data
 
     def find_id_by_row(row_number):
@@ -81,17 +80,18 @@ def excel_to_hierarchy_db(file_path, sheet_name):
             raise ValueError(f"No category found with id {row_number}")
 
     # Build hierarchy from DataFrame
-    build_hierarchy(df, 21)
+    build_hierarchy(df, 1)
 
     # Extract special data
-    special_data = extract_special_data(df)
+    # special_data = extract_special_data(df)
 
     # Update list_ayat in database
-    for node_id, ayat_list in special_data.items():
-        category = session.get(Category, node_id)
-        if category:
-            category.list_ayat = json.dumps(ayat_list)
-    session.commit()
+    # for node_id, ayat_list in ayat_data.items():
+    #     category = session.get(Category, node_id)
+    #     if category:
+    #         category.list_ayat = json.dumps(ayat_list)
+    # session.commit()
+    print(ayat_data)
 
 
 # Contoh penggunaan

@@ -20,7 +20,7 @@ def index():
 
 
 @blueprint.route('/kategori')
-@login_required
+# @login_required
 def kategori():
     categories = Category.query.all()
     return render_template('crud/kategori.html', categories=categories)

@@ -3,9 +3,10 @@ from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 # Setup database connection and model
 Base = declarative_base()
-engine = create_engine('sqlite:///../../apps/db.sqlite')
+engine = create_engine('sqlite:///../../apps/db.sqlite3')
 Session = sessionmaker(bind=engine)
 session = Session()
+
 
 class Category(Base):
     __tablename__ = 'category'
@@ -18,7 +19,9 @@ class Category(Base):
     def __repr__(self):
         return f'<Category {self.name}>'
 
+
 Base.metadata.create_all(engine)
+
 
 def delete_hierarchy_by_id(category_id):
     def delete_category_and_children(category):
@@ -30,6 +33,7 @@ def delete_hierarchy_by_id(category_id):
     if category_to_delete:
         delete_category_and_children(category_to_delete)
         session.commit()
+
 
 # Contoh penggunaan untuk menghapus data dengan ID tertentu
 delete_hierarchy_by_id(3)
