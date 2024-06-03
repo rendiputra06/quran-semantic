@@ -40,7 +40,8 @@ def edit_kategori():
     category_id = request.args.get('id')
     category = Category.query.get(category_id)
     if category:
-        category_data = [category.id, category.name, category.parent_id]
+        parent_id = category.parent_id if category.parent_id else None
+        category_data = [category.id, category.name, parent_id]
     else:
         category_data = "Kategori tidak ditemukan"
     return jsonify(records=category_data)
