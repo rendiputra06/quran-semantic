@@ -124,6 +124,24 @@
       </div>
     </div>
   </div>
+  <!-- Modal -->
+  <div class="modal fade" id="tampilModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Ayat</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 {% endblock content %}
 
@@ -169,13 +187,22 @@
             data: { parent_id: parentId },
             success: function(response) {
                 const subUl = $('<ul class="list-group list-group-flush kategoris"></ul>');
-                response.records.forEach(function(record) {
-                    let subLi = `<li class="list-group-item mr-1 ml-1 hover">
-                        <input type="radio" name="radio-group" class="form-check-input" value="${record[0]}" id="exampleCheck${record[0]}">
-                            <a href="#" class="font-weight-bold" data-id="${record[0]}">${record[1]}</a>
-                        </li>`;
-                    subUl.append(subLi);
-                });
+                if(response.ayat){
+                    response.records.forEach(function(record) {
+                        let subLi = `<li class="list-group-item mr-1 ml-1 hover">
+                                <a href="#" class="font-weight-bold" data-id="${record}" data-ayat="1">${record}</a>
+                            </li>`;
+                        subUl.append(subLi);
+                    });
+                }else{
+                    response.records.forEach(function(record) {
+                        let subLi = `<li class="list-group-item mr-1 ml-1 hover">
+                            <input type="radio" name="radio-group" class="form-check-input" value="${record[0]}" id="exampleCheck${record[0]}">
+                                <a href="#" class="font-weight-bold" data-id="${record[0]}" data-ayat="0">${record[1]}</a>
+                            </li>`;
+                        subUl.append(subLi);
+                    });
+                }
                 let addSubLi = `<li class="list-group-item mr-1 ml-1 hover">
                     <button class="btn btn-primary btn-sm tambah-sub" data-parent="${parentId}">Tambah</button>
                 </li>`;
@@ -276,12 +303,16 @@
             const parentId = $(this).data('id');
             const container = $(this).closest('.col-sm-3');
             const parent_name = $(this).text();
-            load_subcategories(parentId, container, parent_name);
+            const ayat = $(this).data('ayat');
+            if(ayat == '1'){
+                tampilkanAyat(parentId)
+            }else{
+                load_subcategories(parentId, container, parent_name);
+            }
             
         });
         $(document).on('click', '.kategoris li button', function() {
             let parent_id = $(this).data('parent');
-            console.log(parent_id)
             $('#addForm select[name="parent_id"]').val(parent_id);
             $('#exampleModal').modal('show');
         });
@@ -289,12 +320,46 @@
     $('#inputAyat').on('click', function() {
             let id = $('#kategori-data').find('input[name="radio-group"]:checked').attr('value');
             if(id != undefined){
-                console.log(id)
                 $('#ayatModal').modal('show');
             }else{
                 alert('Pilih Data terlebih dahulu')
             }
     });
+    function tampilkanAyat(value)
+    {
+        $.ajax({
+            url: '/view_ayat/',
+            method: 'GET',
+            data: { value: value },
+            success: function(response) {
+                console.log(response)
+                // Memeriksa apakah response berisi data
+                if (response.records && response.records.length > 0) {
+                    var ayatContent = '';
+                    
+                    // Menggabungkan semua ayat dalam response menjadi satu string
+                    response.records.forEach(function(result) {
+                        // ayatContent += '<h4>' + ayat.isi_ayat + '</h4>';
+                        // ayatContent += '<p>' + ayat.ayat_indo + '</p>';
+                        ayatContent += `<div class="card mb-2">
+                            <div class="card-body">
+                                <h3 class="card-title text-right">${result.surah_nama + ' ~ ' + result.surah_nama_latin}</h3>
+                                <h4 class="card-text text-right">${result.isi_ayat}</h4>
+                                <p class="card-text text-justify">${result.ayat_indo}</p>
+                                <p class="card-text">(${result.surah_nama + ' ~ ' + result.surah_nama_latin}) | (${result.nomor_di_surah}) | (${result.nomor_ayat})</p>
+                            </div>
+                        </div>`;
+                    });
+                    
+                    // Menampilkan ayat dalam modal
+                    $('#tampilModal').find('.modal-body').html(ayatContent);
+                } else {
+                    $('#tampilModal').find('.modal-body').html('<p>Ayat tidak ditemukan.</p>');
+                }
+                $('#tampilModal').modal('show');
+            }
+        });
+    }
 </script>
 
 {% endblock javascripts %}
