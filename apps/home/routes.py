@@ -4,10 +4,10 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from apps.home import blueprint
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify, json
 from flask_login import login_required
 from jinja2 import TemplateNotFound
-from apps.home.models import db, Category, Ayat
+from apps.home.models import db, Category, Ayat, Surat
 
 
 @blueprint.route('/index')
@@ -40,7 +40,8 @@ def edit_kategori():
     category_id = request.args.get('id')
     category = Category.query.get(category_id)
     if category:
-        category_data = [category.id, category.name, category.parent_id]
+        parent_id = category.parent_id if category.parent_id else None
+        category_data = [category.id, category.name, parent_id]
     else:
         category_data = "Kategori tidak ditemukan"
     return jsonify(records=category_data)
@@ -103,9 +104,50 @@ def view_subkategori():
     parent_id = request.args.get('parent_id')
     subcategories = Category.query.filter_by(parent_id=parent_id).all()
     subcategories_list = []
-    for subcategory in subcategories:
-        subcategories_list.append([subcategory.id, subcategory.name])
+
+    if subcategories:
+        for subcategory in subcategories:
+            subcategories_list.append([subcategory.id, subcategory.name])
+    else:
+        parent_category = Category.query.get(parent_id)
+        if parent_category and parent_category.list_ayat:
+            list_ayat = json.loads(parent_category.list_ayat)
+            return jsonify(records=list_ayat, ayat=True)
+
     return jsonify(records=subcategories_list)
+
+@blueprint.route('/view_ayat/', methods=['GET'])
+def view_ayat():
+    value = request.args.get('value')
+    
+    if value:
+        try:
+            # Parsing value in the format Qs.1:11
+            surah_num, ayat_num = value.split(':')
+            surah_num = surah_num.replace('Qs.', '').strip()
+            ayat_num = ayat_num.strip()
+            
+            ayat = Ayat.query.filter_by(surah_id=surah_num, nomor_di_surah=ayat_num).first()
+            
+            if ayat:
+                surah = Surat.query.filter_by(id=ayat.surah_id).first()
+                ayat_data = {
+                    'nomor_ayat': ayat.nomor_ayat,
+                    'surah_id': ayat.surah_id,
+                    'isi_ayat': ayat.isi_ayat,
+                    'ayat_indo': ayat.ayat_indo,
+                    'nomor_di_surah': ayat.nomor_di_surah,
+                    'nomor_di_alquran': ayat.nomor_di_alquran,
+                    'surah_nama' : surah.nama,
+                    'surah_nama_latin' : surah.nama_latin
+                }
+                return jsonify(records=[ayat_data])
+            else:
+                return jsonify(records=[]), 404
+        
+        except Exception as e:
+            return jsonify(error=str(e)), 400
+    return jsonify(records=[]), 400
 
 
 @blueprint.route('/<template>')

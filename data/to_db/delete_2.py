@@ -26,7 +26,12 @@ class Category(Base):
 Base.metadata.create_all(engine)
 
 
-def delete_category_and_children(category_id):
+def delete_category_and_children():
+    try:
+        category_id = int(input("Masukkan ID kategori yang ingin Anda hapus: "))
+    except ValueError:
+        print("ID kategori harus berupa angka.")
+        return
     category = session.query(Category).get(category_id)
     if category:
         session.delete(category)
@@ -36,4 +41,4 @@ def delete_category_and_children(category_id):
 
 
 # Contoh penggunaan untuk menghapus entri dengan ID tertentu
-delete_category_and_children(7)
+delete_category_and_children()
