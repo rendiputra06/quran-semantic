@@ -10,6 +10,8 @@ __pycache__/
 *.db
 *.sqlite3
 *.log
+*.model
+*.npy
 
 # venv
 env
