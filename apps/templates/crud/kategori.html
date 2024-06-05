@@ -331,6 +331,9 @@
             url: '/view_ayat/',
             method: 'GET',
             data: { value: value },
+            beforeSend: function(){
+                swal.fire({title: 'Menunggu',html: 'Memproses data',didOpen: () => {swal.showLoading()}})
+            },
             success: function(response) {
                 console.log(response)
                 // Memeriksa apakah response berisi data
@@ -356,7 +359,10 @@
                 } else {
                     $('#tampilModal').find('.modal-body').html('<p>Ayat tidak ditemukan.</p>');
                 }
-                $('#tampilModal').modal('show');
+                setTimeout(function() {
+                    swal.close()
+                    $('#tampilModal').modal('show');
+                }, 800);
             }
         });
     }

@@ -8,129 +8,123 @@ function load_data()
             const main = $('#main-ul');
             main.empty();
             response.records.forEach(function(record) {
-                let roww = `<li class="list-group-item list-group-item-action hover" data-id="${record[0]}">
-                        <a href="#" class="font-weight-bold">${record[1]}</a>  
-                        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown">
-                            <i class="fas fa-ellipsis-h"></i> 
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <button class="dropdown-item editBtn" data-id="${record[0]}">Edit</button>
-                            <button class="dropdown-item deleteBtn" data-id="${record[0]}">Hapus</button>
-                        </div>
+                let roww = `<li class="list-group-item mr-1 ml-1 hover">
+                        <input type="radio" name="radio-group" class="form-check-input" value="${record[0]}" id="exampleCheck${record[0]}">
+                        <a href="#" class="font-weight-bold" data-id="${record[0]}">${record[1]}</a>
                     </li>`;
                 main.append(roww);
             });
-
-            // Attach event handlers to dynamically created buttons
-            attachEventHandlers();
         }
     });
 }
 
-function load_subcategories(parentId, container) {
+function load_subcategories(parentId, container, parent_name) {
+    // Hapus semua subkategori yang ada
+    let level = container.data('level');
+    if(level == 1){
+        $('.col-sm-3').not(container).remove();
+    }else{
+        $('.col-sm-3').each(function() {
+            if ($(this).data('level') > level) {
+                $(this).remove();
+            }
+        });
+    }
+    
     $.ajax({
         url: '/view_subkategori/',
         method: 'GET',
         data: { parent_id: parentId },
         success: function(response) {
-            const subUl = $('<ul class="list-group list-group-flush"></ul>');
-            response.records.forEach(function(record) {
-                let subLi = `<li class="list-group-item list-group-item-action hover" data-id="${record[0]}">
-                        <a href="#" class="font-weight-bold">${record[1]}</a>  
-                        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown">
-                            <i class="fas fa-ellipsis-h"></i> 
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <button class="dropdown-item editBtn" data-id="${record[0]}">Edit</button>
-                            <button class="dropdown-item deleteBtn" data-id="${record[0]}">Hapus</button>
-                        </div>
-                    </li>`;
-                subUl.append(subLi);
-            });
+            const subUl = $('<ul class="list-group list-group-flush kategoris"></ul>');
+            if(response.ayat){
+                response.records.forEach(function(record) {
+                    let subLi = `<li class="list-group-item mr-1 ml-1 hover">
+                            <a href="#" class="font-weight-bold" data-id="${record}" data-ayat="1">${record}</a>
+                        </li>`;
+                    subUl.append(subLi);
+                });
+            }else{
+                response.records.forEach(function(record) {
+                    let subLi = `<li class="list-group-item mr-1 ml-1 hover">
+                        <input type="radio" name="radio-group" class="form-check-input" value="${record[0]}" id="exampleCheck${record[0]}">
+                            <a href="#" class="font-weight-bold" data-id="${record[0]}" data-ayat="0">${record[1]}</a>
+                        </li>`;
+                    subUl.append(subLi);
+                });
+            }
+            let addSubLi = `<li class="list-group-item mr-1 ml-1 hover">
+                <button class="btn btn-primary btn-sm tambah-sub" data-parent="${parentId}">Tambah</button>
+            </li>`;
+            subUl.append(addSubLi);
 
-            const parentName = container.find('a.font-weight-bold').text();
             const newCard = `
                 <div class="card">
                     <div class="card-header">
-                        <h5>${parentName}</h5>
+                        <h5>${parent_name}</h5>
                     </div>
-                    <div class="card-body">
                         ${subUl.prop('outerHTML')}
-                    </div>
                 </div>`;
 
-            const newCol = $('<div class="col-sm-3"></div>').append(newCard);
+            const newCol = $('<div class="col-sm-3" data-level="'+(parseInt(level) + 1) +'"></div>').append(newCard);
             container.after(newCol);
-
-            // Attach event handlers to dynamically created buttons
-            attachEventHandlers();
         }
     });
 }
-
-$('#addForm').on('submit', function(e) {
-    e.preventDefault();
-    const formData = $('#addForm').serialize();
-    $.ajax({
-        url: '/add_kategori/',
-        method: 'POST',
-        data: formData,
-        success: function(response) {
-            // alert(response.msg);
-            $('#load_data').click();
-            $('#addForm')[0].reset();
-            $('#exampleModal').modal('hide');
-        }
-    });
-});
 $('#addCategory').on('click', function(e) {
     $('#addForm').trigger('submit')
 });
 $('#load_data').on('click', function(e) {
     load_data()
 });
-function attachEventHandlers() {
-    // Edit Student
-    $('.editBtn').on('click', function() {
-        $.ajax({
-            url: '/edit_kategori/',
-            method: 'GET',
-            data: { id: $(this).data('id') },
-            success: function(response) {
-                console.log(response)
-                record = response.records
-                $('#addForm input[name="id"]').val(record[0]);
-                $('#addForm input[name="mode"]').val('update');
-                $('#addForm input[name="name"]').val(record[1]);
-                $('#addForm input[name="parent_id"]').val(record[2]);
-                $('#exampleModal').modal('show');
-            }
-        });
-    });
 
-    // Delete Student
-    $('.deleteBtn').on('click', function() {
-        const studentId = $(this).data('id');
-        if (confirm('Are you sure you want to delete this record?')) {
-            $.ajax({
-                url: '/delete_kategori/',
-                method: 'POST',
-                data: { id: studentId },
-                success: function(response) {
-                    alert(response.msg);
-                    $('#load_data').click();
-                }
-            });
+
+$('#clearSubcategoriesBtn').on('click', function() {
+    clearSubcategories();
+});
+
+function clearSubcategories() {
+    $('.col-sm-3').not(':first').remove();
+}
+
+function tampilkanAyat(value)
+{
+    $.ajax({
+        url: '/view_ayat/',
+        method: 'GET',
+        data: { value: value },
+        beforeSend: function(){
+            swal.fire({title: 'Menunggu',html: 'Memproses data',didOpen: () => {swal.showLoading()}})
+        },
+        success: function(response) {
+            console.log(response)
+            // Memeriksa apakah response berisi data
+            if (response.records && response.records.length > 0) {
+                var ayatContent = '';
+                
+                // Menggabungkan semua ayat dalam response menjadi satu string
+                response.records.forEach(function(result) {
+                    // ayatContent += '<h4>' + ayat.isi_ayat + '</h4>';
+                    // ayatContent += '<p>' + ayat.ayat_indo + '</p>';
+                    ayatContent += `<div class="card mb-2">
+                        <div class="card-body">
+                            <h3 class="card-title text-right">${result.surah_nama + ' ~ ' + result.surah_nama_latin}</h3>
+                            <h4 class="card-text text-right">${result.isi_ayat}</h4>
+                            <p class="card-text text-justify">${result.ayat_indo}</p>
+                            <p class="card-text">(${result.surah_nama + ' ~ ' + result.surah_nama_latin}) | (${result.nomor_di_surah}) | (${result.nomor_ayat})</p>
+                        </div>
+                    </div>`;
+                });
+                
+                // Menampilkan ayat dalam modal
+                $('#tampilModal').find('.modal-body').html(ayatContent);
+            } else {
+                $('#tampilModal').find('.modal-body').html('<p>Ayat tidak ditemukan.</p>');
+            }
+            setTimeout(function() {
+                swal.close()
+                $('#tampilModal').modal('show');
+            }, 800);
         }
     });
 }
-
-$(document).ready(function() {
-    load_data();
-
-    $('#main-ul').on('click', 'li', function() {
-        const parentId = $(this).data('id');
-        const container = $(this).closest('.col-sm-3');
-        load_subcategories(parentId, container);
-    });
-});
