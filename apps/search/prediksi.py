@@ -1,6 +1,6 @@
 from requests import get
 from flask import jsonify, make_response
-from flask_restful import Resource
+# from flask_restful import Resource
 from gensim.models.fasttext import load_facebook_model
 from gensim.models import Word2Vec
 from .preprocess import *
@@ -26,7 +26,6 @@ def fetch(verse_ids):
         results = results.json()
         output.append(results['data'])
     return output
-
 
 
 def semantikSearch(query):

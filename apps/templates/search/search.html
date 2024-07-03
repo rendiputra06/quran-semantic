@@ -40,29 +40,30 @@
                                                     <h5 class="mb-3">Jumlah Pencarian : <span id="tdjumlah"></span></h5>
                                                     <div class="card">
                                                         <div class="card-body">  
-                                                            <table class="table table-sm" id="hasill">
-                                                                <thead>
-                                                                    <th>Ayat</th>
-                                                                </thead>
-                                                                <tbody id="tdhasil">
-                                                                </tbody>
-                                                            </table>
+                                                            <div class="table-responsive">
+                                                                <table class="table" id="hasill">
+                                                                    <thead>
+                                                                        <th>Ayat</th>
+                                                                        <th>Tema</th>
+                                                                    </thead>
+                                                                    <tbody id="tdhasil">
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <!-- ./col -->
                                                 <div class="col-md-4">
-                                                    <div class="mb-2">
-                                                        <h5 class="d-flex justify-content-between align-items-center mb-3">
-                                                            <span class="text-muted">Perluasan Kata</span>
-                                                            <span class="badge badge-secondary badge-pill">3</span>
-                                                        </h5>
-                                                        <ul class="list-group mb-3" id="productList">
-                                                            <li class="list-group-item d-flex justify-content-between lh-condensed">
-                                                                <p class="my-0"> . . . . . . . . .</p>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
+                                                    <h5 class="d-flex justify-content-between align-items-center mb-3">
+                                                        <span class="text-muted">Perluasan Kata</span>
+                                                        <span class="badge badge-secondary badge-pill">3</span>
+                                                    </h5>
+                                                    <ul class="list-group mb-3" id="daftarkata">
+                                                        <li class="list-group-item d-flex justify-content-between lh-condensed">
+                                                            <p class="my-0"> . . . . . . . . .</p>
+                                                        </li>
+                                                    </ul>
                                                 </div>        
                                             </div>
                                         </div>
@@ -146,10 +147,16 @@
             $('#addForm select[name="parent_id"]').val(parent_id);
             $('#exampleModal').modal('show');
         });
+        $(document).on('click', 'table#hasill .lihat-ayat', function(){
+            let value = $(this).data('value');
+            tampilkanAyat(value)
+            console.log(value)
+        })
     });
     $('.runSearch').on('click', function(){
         var jenis = $(this).data('id');
         const query = $('#searchQuery').val();
+        console.log(query)
         if(!query){
             console.error('Kata Pencarian Belum diisi');
             return
@@ -158,7 +165,7 @@
             case 1:
                 searchWord(query)
                 break;
-            case 2:
+            case 3:
                 searchSemantik(query)
                 break;
         
@@ -172,21 +179,18 @@
         tablenya.empty();
         totalResults = jumlah
         $('#tdjumlah').text(jumlah)
-        // Populate the table with search results
         ayat.forEach(result => {
-            const row = $(`<tr><td>${convertToQuranFormat(result.nomor_ayat)}</td></tr>`);
+            const row = $(`<tr><td><span role="button" class="lihat-ayat" data-value="${result.quran_format}">${result.quran_format}</span></td>
+                <td>${libb(result.breadcrumb)}</td></tr>`);
             tablenya.append(row);
         });
     }
-    function convertToQuranFormat(inputString) {
-        // Memisahkan nomor surat dan nomor ayat dari inputString
-        const surahNumber = parseInt(inputString.substring(1, 4), 10);
-        const ayahNumber = parseInt(inputString.substring(5), 10);
-
-        // Membuat format "QS. x:y" dari nomor surat dan nomor ayat
-        const result = `QS. ${surahNumber}:${ayahNumber}`;
-
-        return result;
+    function libb(inputString) {
+        let formattedList = '';
+        inputString.forEach(item => {
+            formattedList += `<li>${item.trim()}</li>`;
+        });
+        return formattedList;
     }
     function searchWord(query){
         const loweredQuery = query.toLowerCase();
@@ -211,7 +215,7 @@
         const loweredQuery = query.toLowerCase();
         // const filteredResults = searchResults.filter(result => result.text.toLowerCase().includes(loweredQuery));
         $.ajax({
-            url: 'http://localhost:5000/api/semantic/similar-verse/'+loweredQuery,
+            url: 'http://localhost:5000/api/semantik/'+loweredQuery,
             type: 'get',
             dataType: 'json',
             beforeSend: function() {
@@ -220,12 +224,32 @@
             success: function (result) {
                 console.log(result);
                 setTimeout(function() {
-                    displaySearchResults(result.data, result.length);
-                    renderProductList(result.kata)
                     tampilkan(result.data, result.length)
+                    renderKata(result.kata)
                     swal.close()
                 }, 800);
             }
+        });
+    }
+    function scoreResult(score)
+    {
+        // Menggunakan toFixed untuk membatasi angka desimal menjadi 3 digit
+        const shortenedNumber = Number(score.toFixed(3));
+
+        return shortenedNumber;
+    }
+    // Function to render the product list dynamically
+    function renderKata(products) {
+        var productListElement = $('#daftarkata');
+        
+        // Clear existing items
+        productListElement.empty();
+    
+        // Add each product dynamically
+        products.forEach(function(productName) {
+            var listItem = $('<li class="list-group-item d-flex justify-content-between lh-condensed"></li>');
+            listItem.append('<p class="my-0">' + productName.word + ' / ' + scoreResult(productName.score) +'</p>');
+            productListElement.append(listItem);
         });
     }
 </script>

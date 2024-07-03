@@ -1,20 +1,11 @@
-from .preprocess import clean, get_quran_clean_text
-from pyarabic.araby import tokenize
+from .preprocess import clean, get_quran_indo_clean_text
+# from pyarabic.araby import tokenize
 import numpy as np
 
-quran_clean_text = get_quran_clean_text()
+quran_clean_text = get_quran_indo_clean_text()
 
 
 def get_max_pooling_vec(query_text, model):
-    '''
-    Get the max pooling vector for the given tokens.
-    @param query_text: list of words
-    @type query_text: list
-    @param model: tuple of the pre-trained model to use and its name
-    @type model: Word2Vec or KeyedVectors
-    @return: max pooling vector
-    @rtype: numpy array
-    '''
 
     # Warning: checkout the shape of the vectors
     arr = [-1e9 for idx in range(300)]
@@ -40,15 +31,6 @@ def get_max_pooling_vec(query_text, model):
 
 
 def get_avg_pooling_vec(query_text, model):
-    '''
-    Get the average pooling vector for the given tokens.
-    @param query_text: list of words
-    @type query_text: list
-    @param model: tuple of the pre-trained model to use and its name
-    @type model: Word2Vec or KeyedVectors
-    @return: average pooling vector
-    @rtype: numpy array
-    '''
 
     # Warning: checkout the shape of the vectors
     arr = [0 for idx in range(300)]
@@ -79,18 +61,6 @@ def get_avg_pooling_vec(query_text, model):
 
 
 def get_pooling_results(query_text, model, method):
-    '''
-    Get the pooling results for the given tokens,
-    according to the given model and method.
-    @param query_text: list of words
-    @type query_text: list
-    @param model: tuple of the pre-trained model to use and its name
-    @type model: Word2Vec or KeyedVectors
-    @param method: the method to use
-    @type method: function
-    @return: most similar verses
-    @rtype: list of tuples (score, verse_id, verse)
-    '''
 
     query_method_pooling_vec = method(query_text, model)
 
