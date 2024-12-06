@@ -37,6 +37,10 @@ def cari(words):
         data = [
             {
                 'nomor_ayat': ayat.Ayat.nomor_ayat,
+                'isi_ayat': ayat.Ayat.isi_ayat,
+                'ayat_indo': ayat.Ayat.ayat_indo,
+                'surah': ayat.Surat.nama,
+                'nama_latin': ayat.Surat.nama_latin,
                 'surah_id': ayat.Ayat.surah_id,
                 'nomor_di_surah': ayat.Ayat.nomor_di_surah,
                 'nomor_di_alquran': ayat.Ayat.nomor_di_alquran,
@@ -95,16 +99,20 @@ def semantik(words):
     try:
         result = semantikSearch(words)
         verse_ids = result['data']
-        verses = db.session.query(Ayat).filter(
+        verses = db.session.query(Ayat, Surat).join(Surat, Ayat.surah_id == Surat.id).filter(
             Ayat.nomor_di_alquran.in_(verse_ids)).all()
         formatted_verses = [
             {
-                'nomor_ayat': verse.nomor_ayat,
-                'surah_id': verse.surah_id,
-                'nomor_di_surah': verse.nomor_di_surah,
-                'nomor_di_alquran': verse.nomor_di_alquran,
-                'quran_format': convert_to_quran_format(verse.nomor_ayat),
-                'breadcrumb': find_ayat_breadcrumb(verse.nomor_ayat)
+                'nomor_ayat': verse.Ayat.nomor_ayat,
+                'isi_ayat': verse.Ayat.isi_ayat,
+                'ayat_indo': verse.Ayat.ayat_indo,
+                'surah': verse.Surat.nama,
+                'nama_latin': verse.Surat.nama_latin,
+                'surah_id': verse.Ayat.surah_id,
+                'nomor_di_surah': verse.Ayat.nomor_di_surah,
+                'nomor_di_alquran': verse.Ayat.nomor_di_alquran,
+                'quran_format': convert_to_quran_format(verse.Ayat.nomor_ayat),
+                'breadcrumb': find_ayat_breadcrumb(verse.Ayat.nomor_ayat)
             }
             for verse in verses
         ]

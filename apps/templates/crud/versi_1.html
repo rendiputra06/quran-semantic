@@ -1,0 +1,317 @@
+{% extends "layouts/base-fullscreen.html" %} {% block title %} Al - Quran {%
+endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+
+<div class="pcoded-wrapper">
+  <div class="pcoded-content">
+    <div class="pcoded-inner-content">
+      <div class="main-body">
+        <div class="page-wrapper">
+          <!-- [ Main Content ] start -->
+          <div class="row" id="main-row">
+            <div class="col-sm-12">
+              <div class="card">
+                <div class="card-body">
+                  <!-- Navigasi Dinamis -->
+                  <a href="/index?view=default" class="btn btn-outline-primary"
+                    >Version 1</a
+                  >
+                  <a href="/index?view=v2" class="btn btn-success">Version 2</a>
+                  <a href="/index?view=v3" class="btn btn-warning">Version 3</a>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header">
+                  <h5>Pencarian Versi 1</h5>
+                </div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label for="searchQuery">Pencarian Ayat Alquran</label>
+                    <div class="input-group">
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="searchQuery"
+                        value="dosa besar"
+                      />
+                      <div class="input-group-append">
+                        <button
+                          class="btn btn-primary runSearch"
+                          data-id="1"
+                          type="button"
+                        >
+                          Kata
+                        </button>
+                        <button
+                          class="btn btn-primary runSearch"
+                          data-id="3"
+                          type="button"
+                        >
+                          Semantik
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-2">
+                    <div class="col-md-8">
+                      <h5 class="mb-3">
+                        Jumlah Pencarian : <span id="tdjumlah"></span>
+                      </h5>
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="table-responsive">
+                            <table class="table" id="hasill">
+                              <thead>
+                                <th>Ayat</th>
+                                <th>Tema</th>
+                              </thead>
+                              <tbody id="tdhasil"></tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- ./col -->
+                    <div class="col-md-4">
+                      <h5
+                        class="d-flex justify-content-between align-items-center mb-3"
+                      >
+                        <span class="text-muted">Perluasan Kata</span>
+                        <span class="badge badge-secondary badge-pill">3</span>
+                      </h5>
+                      <ul class="list-group mb-3" id="daftarkata">
+                        <li
+                          class="list-group-item d-flex justify-content-between lh-condensed"
+                        >
+                          <p class="my-0">. . . . . . . . .</p>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header">
+                  <h5>Kategori</h5>
+                </div>
+                <div class="card-body">
+                  <div class="mb-2">
+                    <button id="load_data" class="btn btn-primary">
+                      Reload Data
+                    </button>
+                    <button
+                      id="clearSubcategoriesBtn"
+                      class="btn btn-secondary"
+                    >
+                      Clear Subcategories
+                    </button>
+                    <div class="row" id="kategori-data">
+                      <div class="col-sm-3" data-level="1">
+                        <div class="card">
+                          <div class="card-header">
+                            <h5>Kategori</h5>
+                          </div>
+                          <ul
+                            id="main-ul"
+                            class="list-group list-group-flush kategoris"
+                          ></ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- [ Main Content ] end -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="tampilModal"
+    tabindex="-1"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Ayat</h5>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock content %}
+
+  <!-- Specific Page JS goes HERE  -->
+  {% block javascripts %}
+  <script src="{{ config.ASSETS_ROOT }}/js/kategori.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      load_data();
+
+      $(document).on("click", ".kategoris li a", function () {
+        const parentId = $(this).data("id");
+        const container = $(this).closest(".col-sm-3");
+        const parent_name = $(this).text();
+        const ayat = $(this).data("ayat");
+        if (ayat == "1") {
+          tampilkanAyat(parentId);
+        } else {
+          load_subcategories(parentId, container, parent_name);
+        }
+      });
+      $(document).on("click", ".kategoris li button", function () {
+        let parent_id = $(this).data("parent");
+        $('#addForm select[name="parent_id"]').val(parent_id);
+        $("#exampleModal").modal("show");
+      });
+      $(document).on("click", "table#hasill .lihat-ayat", function () {
+        let value = $(this).data("value");
+        tampilkanAyat(value);
+        console.log(value);
+      });
+    });
+    $(".runSearch").on("click", function () {
+      var jenis = $(this).data("id");
+      const query = $("#searchQuery").val();
+      console.log(query);
+      if (!query) {
+        console.error("Kata Pencarian Belum diisi");
+        return;
+      }
+      switch (jenis) {
+        case 1:
+          searchWord(query);
+          break;
+        case 3:
+          searchSemantik(query);
+          break;
+
+        default:
+          break;
+      }
+    });
+    function tampilkan(ayat, jumlah) {
+      const tablenya = $("#tdhasil");
+      tablenya.empty();
+      totalResults = jumlah;
+      $("#tdjumlah").text(jumlah);
+      ayat.forEach((result) => {
+        const row =
+          $(`<tr><td><span role="button" class="lihat-ayat" data-value="${
+            result.quran_format
+          }">${result.quran_format}</span></td>
+                <td>${libb(result.breadcrumb)}</td></tr>`);
+        tablenya.append(row);
+      });
+    }
+    function libb(inputString) {
+      let formattedList = "";
+      inputString.forEach((item) => {
+        formattedList += `<li>${item.trim()}</li>`;
+      });
+      return formattedList;
+    }
+    function searchWord(query) {
+      const loweredQuery = query.toLowerCase();
+      // const filteredResults = searchResults.filter(result => result.text.toLowerCase().includes(loweredQuery));
+      $.ajax({
+        url: "http://localhost:5000/api/cari/" + loweredQuery,
+        type: "get",
+        dataType: "json",
+        beforeSend: function () {
+          swal.fire({
+            title: "Menunggu",
+            html: "Memproses data",
+            didOpen: () => {
+              swal.showLoading();
+            },
+          });
+        },
+        success: function (result) {
+          console.log(result);
+          setTimeout(function () {
+            tampilkan(result.data, result.length);
+            swal.close();
+          }, 800);
+        },
+      });
+    }
+    function searchSemantik(query) {
+      const loweredQuery = query.toLowerCase();
+      // const filteredResults = searchResults.filter(result => result.text.toLowerCase().includes(loweredQuery));
+      $.ajax({
+        url: "http://localhost:5000/api/semantik/" + loweredQuery,
+        type: "get",
+        dataType: "json",
+        beforeSend: function () {
+          swal.fire({
+            title: "Menunggu",
+            html: "Memproses data",
+            didOpen: () => {
+              swal.showLoading();
+            },
+          });
+        },
+        success: function (result) {
+          console.log(result);
+          setTimeout(function () {
+            tampilkan(result.data, result.length);
+            renderKata(result.kata);
+            swal.close();
+          }, 800);
+        },
+      });
+    }
+    function scoreResult(score) {
+      // Menggunakan toFixed untuk membatasi angka desimal menjadi 3 digit
+      const shortenedNumber = Number(score.toFixed(3));
+
+      return shortenedNumber;
+    }
+    // Function to render the product list dynamically
+    function renderKata(products) {
+      var productListElement = $("#daftarkata");
+
+      // Clear existing items
+      productListElement.empty();
+
+      // Add each product dynamically
+      products.forEach(function (productName) {
+        var listItem = $(
+          '<li class="list-group-item d-flex justify-content-between lh-condensed"></li>'
+        );
+        listItem.append(
+          '<p class="my-0">' +
+            productName.word +
+            " / " +
+            scoreResult(productName.score) +
+            "</p>"
+        );
+        productListElement.append(listItem);
+      });
+    }
+  </script>
+  {% endblock javascripts %}
+</div>

@@ -1,10 +1,13 @@
 from requests import get
 from flask import jsonify, make_response
 # from flask_restful import Resource
-from gensim.models.fasttext import load_facebook_model
+# from gensim.models.fasttext import load_facebook_model
+import warnings
+warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
 from gensim.models import Word2Vec
 from .preprocess import *
 from .fungsi_semantik import *
+from .semantik import *
 from .pooling import *
 
 # model_tw = Word2Vec.load('././models/full_grams_cbow_100_twitter.mdl').wv
@@ -31,6 +34,7 @@ def fetch(verse_ids):
 def semantikSearch(query):
 
     results = search_by_sentence(query, model_pakai, get_verse_max_score)
+    # results = cari_kalimat(query, model_pakai, get_verse_max_score)
     # kata = search_by_word(query, model_pakai, get_verse_max_score)
     # kata = search_similar_word(query, model_pakai)
     kata = search_similar_word_with_scores(query, model_pakai)

@@ -3,8 +3,9 @@ import string
 import pandas as pd
 
 # Define function to preprocess text
-nltk.download('punkt')
-nltk.download('stopwords')
+# jalankan secara manual di command line
+# nltk.download('punkt')
+# nltk.download('stopwords')
 stop_words = set(nltk.corpus.stopwords.words('indonesian'))
 
 def clean(text):

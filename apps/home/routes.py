@@ -5,22 +5,35 @@ Copyright (c) 2019 - present AppSeed.us
 
 from apps.home import blueprint
 from flask import render_template, request, jsonify, json
-from flask_login import login_required
+from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
 from apps.home.models import db, Category, Ayat, Surat
 
 
 @blueprint.route('/index')
-@login_required
+# @login_required
 def index():
 
     categories = Category.query.all()
-    print(categories)
-    return render_template('crud/index.html', segment='index')
+    # print(categories)
+    print(current_user)
+    if(current_user.is_authenticated ):
+        print('saya sudah login')
+        return render_template('crud/index.html', segment='index')
+    else:
+        # Ambil parameter "view" dari URL (default-nya 'default')
+        view = request.args.get('view', 'default')
+        if view == 'default' :
+            return render_template('crud/versi_1.html', segment='index')
+        elif view == 'v2' :
+            return render_template('crud/versi_2.html', segment='index')
+        elif view == 'v3' :
+            return render_template('crud/versi_3.html', segment='index')
+        print('saya tidak login')
 
 
 @blueprint.route('/kategori')
-# @login_required
+@login_required
 def kategori():
     categories = Category.query.all()
     return render_template('crud/kategori.html', categories=categories)
