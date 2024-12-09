@@ -69,9 +69,8 @@ def excel_to_hierarchy_db(file_path, sheet_name):
         return special_data
 
     # Build hierarchy from DataFrame
-    build_hierarchy(df, 81)
+    build_hierarchy(df, 8)
 
-    
     # Update list_ayat in database
     for node_id, ayat_list in ayat_data.items():
         category = session.get(Category, node_id)
@@ -84,4 +83,5 @@ def excel_to_hierarchy_db(file_path, sheet_name):
 
 
 # Contoh penggunaan
-excel_to_hierarchy_db('../indeks-quran-tercanggih.xls', 'MAKANAN & MINUMAN')
+excel_to_hierarchy_db('../indeks-quran-tercanggih.xls',
+                      "MAKANAN & MINUMAN")

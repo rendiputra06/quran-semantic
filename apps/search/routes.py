@@ -4,7 +4,7 @@ from flask_login import login_required
 from jinja2 import TemplateNotFound
 from apps.home.models import db, Category, Ayat, Surat
 from sqlalchemy import or_
-from apps.search.prediksi import semantikSearch
+# from apps.search.prediksi import semantikSearch
 
 
 @blueprint.route('/search/')
