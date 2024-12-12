@@ -188,5 +188,8 @@ endblock %}
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
-<script src="{{ config.ASSETS_ROOT }}/js/pencarian_v2.js"></script>
+<script>
+  var api_url = "{{ url_for('search_blueprint.search', _external=True) }}";
+</script>
+<script src="{{ config.ASSETS_ROOT }}/js/pencarian_v2.js?v=0.0.1"></script>
 {% endblock javascripts %}

@@ -14,7 +14,7 @@ def search():
     return render_template('search/search.html', categories=categories)
 
 
-@blueprint.route('/api/cari/<words>', methods=['GET'])
+@blueprint.route('/search/cari/<words>', methods=['GET'])
 def cari(words):
     """
     Search in verses using insensitive contains.
@@ -94,7 +94,7 @@ def find_ayat_breadcrumb(nomor_ayat):
     return results
 
 
-@blueprint.route('/api/semantik/<words>', methods=['GET'])
+@blueprint.route('/search/semantik/<words>', methods=['GET'])
 def semantik(words):
     try:
         result = semantikSearch(words)

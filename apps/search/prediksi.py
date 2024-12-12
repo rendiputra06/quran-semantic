@@ -7,18 +7,16 @@ warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
 from gensim.models import Word2Vec
 from .preprocess import *
 from .fungsi_semantik import *
-from .semantik import *
-from .pooling import *
+# from .semantik import *
+# from .pooling import *
 
 # model_tw = Word2Vec.load('././models/full_grams_cbow_100_twitter.mdl').wv
 # model_wiki = Word2Vec.load("././models/indonesia/wiki.id.case.model").wv
 # model_pakai = load_facebook_model('././models/fasttext/wiki.id.bin').wv
-model_pakai = Word2Vec.load(
-    '././models/word2vec/idwiki/idwiki_word2vec_200_new_lower.model').wv
+# model_pakai = Word2Vec.load('././models/word2vec/idwiki/idwiki_word2vec_200_new_lower.model').wv
+model_pakai = Word2Vec.load('././models/alquran_word2vec_1.model').wv
 
-
-quran_clean_text = get_quran_indo_clean_text()
-
+# quran_clean_text = get_quran_indo_clean_text()
 
 def fetch(verse_ids):
     output = []

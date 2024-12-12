@@ -165,8 +165,8 @@ endblock %}
   <!-- Specific Page JS goes HERE  -->
   {% block javascripts %}
   <script src="{{ config.ASSETS_ROOT }}/js/kategori.js"></script>
-
   <script>
+    var api_url = "{{ url_for('search_blueprint.search', _external=True) }}";
     $(document).ready(function () {
       load_data();
 
@@ -233,11 +233,12 @@ endblock %}
       });
       return formattedList;
     }
+    
     function searchWord(query) {
       const loweredQuery = query.toLowerCase();
       // const filteredResults = searchResults.filter(result => result.text.toLowerCase().includes(loweredQuery));
       $.ajax({
-        url: "http://localhost:5000/api/cari/" + loweredQuery,
+        url: api_url+"/cari/" + loweredQuery,
         type: "get",
         dataType: "json",
         beforeSend: function () {
@@ -262,7 +263,7 @@ endblock %}
       const loweredQuery = query.toLowerCase();
       // const filteredResults = searchResults.filter(result => result.text.toLowerCase().includes(loweredQuery));
       $.ajax({
-        url: "http://localhost:5000/api/semantik/" + loweredQuery,
+        url: api_url+"/semantik/" + loweredQuery,
         type: "get",
         dataType: "json",
         beforeSend: function () {

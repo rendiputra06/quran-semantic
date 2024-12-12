@@ -37,3 +37,4 @@ apps/static/assets/.temp
 migrations
 
 data/
+.vercel

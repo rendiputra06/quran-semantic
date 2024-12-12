@@ -87,7 +87,7 @@ function searchWord(query) {
     const loweredQuery = query.toLowerCase();
     // const filteredResults = searchResults.filter(result => result.text.toLowerCase().includes(loweredQuery));
     $.ajax({
-        url: 'http://localhost:5000/api/cari/'+loweredQuery,
+        url: api_url+'/cari/'+loweredQuery,
         type: 'get',
         dataType: 'json',
         beforeSend: function() {
@@ -115,7 +115,7 @@ function searchSinonim(query) {
     const loweredQuery = query.toLowerCase();
     // const filteredResults = searchResults.filter(result => result.text.toLowerCase().includes(loweredQuery));
     $.ajax({
-        url: 'http://localhost:5000/api/semantic/similar-verse-sinonim/'+loweredQuery,
+        url: api_url+'/semantic/similar-verse-sinonim/'+loweredQuery,
         type: 'get',
         dataType: 'json',
         beforeSend: function() {
@@ -141,7 +141,7 @@ function searchSemantik(query) {
     const loweredQuery = query.toLowerCase();
     // const filteredResults = searchResults.filter(result => result.text.toLowerCase().includes(loweredQuery));
     $.ajax({
-        url: 'http://localhost:5000/api/semantik/'+loweredQuery,
+        url: api_url+'/semantik/'+loweredQuery,
         type: 'get',
         dataType: 'json',
         beforeSend: function() {
