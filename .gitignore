@@ -36,5 +36,6 @@ apps/static/assets/.temp
 
 migrations
 
-data/
+data
 .vercel
+envbaru
