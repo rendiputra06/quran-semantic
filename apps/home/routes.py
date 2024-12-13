@@ -7,7 +7,7 @@ from apps.home import blueprint
 from flask import render_template, request, jsonify, json
 from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
-from apps.home.models import db, Category, Ayat, Surat
+from apps.home.models import db, Category, Ayat, Surat, Evaluation
 
 
 @blueprint.route('/index')
@@ -29,6 +29,10 @@ def index():
             return render_template('crud/versi_2.html', segment='index')
         elif view == 'v3' :
             return render_template('crud/versi_3.html', segment='index')
+        elif view == 'table' :
+            return render_template('crud/table.html', segment='index')
+        elif view == 'ontologi' :
+            return render_template('crud/ontologi.html', segment='index')
         print('saya tidak login')
 
 
@@ -162,6 +166,55 @@ def view_ayat():
             return jsonify(error=str(e)), 400
     return jsonify(records=[]), 400
 
+# Endpoint untuk mendapatkan semua evaluasi
+def serialize_evaluation(evaluation):
+    return {
+        'id': evaluation.id,
+        'query': evaluation.query,
+        'tipe': evaluation.tipe,
+        'precision': evaluation.precision_final,
+        'recall': evaluation.recall_final,
+        'f1_score': evaluation.f1_score_final,
+        'map': evaluation.map,
+        'ndcg': evaluation.ndcg
+    }
+
+@blueprint.route('/index/get_evaluations', methods=['GET'])
+def get_evaluations():
+    evaluations = db.session.query(Evaluation).all()
+    serialized = [serialize_evaluation(evaluation) for evaluation in evaluations]
+    return jsonify(serialized)
+
+# Endpoint untuk menghapus satu evaluasi berdasarkan ID
+@blueprint.route('/index/delete_evaluation/<int:id>', methods=['DELETE'])
+def delete_evaluation(id):
+    # evaluation = Evaluation.query.get(id)
+    evaluation = db.session.query(Evaluation).get(id)
+    if not evaluation:
+        return jsonify({'message': 'Evaluation not found'}), 404
+
+    db.session.delete(evaluation)
+    db.session.commit()
+    return jsonify({'message': 'Evaluation deleted successfully'})
+
+# Endpoint untuk menghapus beberapa evaluasi berdasarkan ID
+@blueprint.route('/index/delete_selected', methods=['POST'])
+def delete_selected():
+    data = request.get_json()
+    ids = data.get('ids', [])
+
+    if not ids:
+        return jsonify({'message': 'No IDs provided'}), 400
+
+    evaluations = db.session.query(Evaluation).filter(Evaluation.id.in_(ids)).all()
+    if not evaluations:
+        return jsonify({'message': 'No evaluations found for the given IDs'}), 404
+
+    for evaluation in evaluations:
+        db.session.delete(evaluation)
+    db.session.commit()
+
+    return jsonify({'message': f'{len(evaluations)} evaluations deleted successfully'})
 
 @blueprint.route('/<template>')
 @login_required

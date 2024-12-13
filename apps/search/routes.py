@@ -2,9 +2,9 @@ from apps.search import blueprint
 from flask import render_template, request, jsonify, json
 from flask_login import login_required
 from jinja2 import TemplateNotFound
-from apps.home.models import db, Category, Ayat, Surat
+from apps.home.models import db, Category, Ayat, Surat, Evaluation
 from sqlalchemy import or_
-from apps.search.prediksi import semantikSearch
+# from apps.search.prediksi import semantikSearch
 
 
 @blueprint.route('/search/')
@@ -84,7 +84,7 @@ def find_ayat_breadcrumb(nomor_ayat):
             # Mengambil objek Category berdasarkan parent_id
             category = db.session.query(Category).get(category.parent_id)
             breadcrumb.append(category.name)
-        return ' > '.join(reversed(breadcrumb))
+        return ' <i class="fas fa-angle-double-right"></i> '.join(reversed(breadcrumb))
 
     # Mengumpulkan semua jalur hirarki untuk kategori yang ditemukan
     for category in categories:
@@ -120,3 +120,100 @@ def semantik(words):
         return jsonify(result)
     except Exception as e:
         return jsonify(error=str(e)), 400
+
+@blueprint.route('/search/evaluasi', methods=['POST'])
+def evaluasi():
+    try:
+        data = request.get_json()
+        query = data.get('query', 'Unknown Query')
+        tipe = data.get('tipe', '0')
+        relevance = data.get('relevance', [])
+        metrics = data.get('metrics', {})
+
+        # Ambil array lengkap
+        precision_array = metrics.get('precision', [])
+        recall_array = metrics.get('recall', [])
+        f1_score_array = metrics.get('f1Score', [])
+
+        # Hitung nilai akhir
+        precision_final = precision_array[-1] if precision_array else 0
+        recall_final = recall_array[-1] if recall_array else 0
+        f1_score_final = f1_score_array[-1] if f1_score_array else 0
+
+        # Simpan ke database
+        evaluation = Evaluation(
+            query=query,
+            tipe=tipe,
+            relevance=str(relevance),
+            precision_array=precision_array,
+            recall_array=recall_array,
+            f1_score_array=f1_score_array,
+            precision_final=precision_final,
+            recall_final=recall_final,
+            f1_score_final=f1_score_final,
+            map=metrics.get('map', 0),
+            ndcg=metrics.get('ndcg', 0)
+        )
+        db.session.add(evaluation)
+        db.session.commit()
+
+        return jsonify({"message": "Evaluasi berhasil disimpan!"}), 201
+    except Exception as e:
+        return jsonify({"message": "Gagal menyimpan evaluasi.", "error": str(e)}), 500
+
+
+# Endpoint untuk mengambil data evaluasi
+@blueprint.route('/search/get_evaluation/<int:tipe>', methods=['GET'])
+def get_evaluation(tipe):
+    # Ambil data evaluasi dari database
+    # evaluations = Evaluation.query.all()
+    evaluations = db.session.query(Evaluation).filter_by(tipe=tipe).all()
+
+    # Mengelompokkan data berdasarkan query
+    evaluation_data = {}
+    for evaluation in evaluations:
+        if evaluation.query not in evaluation_data:
+            evaluation_data[evaluation.query] = {
+                'precision': [],
+                'recall': [],
+                'f1_score': [],
+                'map': [],
+                'ndcg': [],
+            }
+
+        # Menambahkan metrik evaluasi ke dalam query yang sesuai
+        evaluation_data[evaluation.query]['precision'].append(evaluation.precision_final)
+        evaluation_data[evaluation.query]['recall'].append(evaluation.recall_final)
+        evaluation_data[evaluation.query]['f1_score'].append(evaluation.f1_score_final)
+        evaluation_data[evaluation.query]['map'].append(evaluation.map)
+        evaluation_data[evaluation.query]['ndcg'].append(evaluation.ndcg)
+
+    # Mengonversi data menjadi format yang bisa digunakan oleh frontend
+    # Misalnya untuk setiap query, kita menampilkan metrik sebagai list
+    final_data = []
+    for query, metrics in evaluation_data.items():
+        final_data.append({
+            'query': query,
+            'metrics': metrics
+        })
+
+    return jsonify(final_data)
+
+@blueprint.route('/search/reset', methods=['POST'])
+def reset():
+    
+    db.session.query(Evaluation).delete()
+    
+    reset_data = {
+        'precision': [0, 0, 0, 0, 0],
+        'recall': [0, 0, 0, 0, 0],
+        'f1Score': [0, 0, 0, 0, 0],
+        'map': 0,
+        'ndcg': 0
+    }
+    
+    # Mengembalikan respon sukses setelah evaluasi direset
+    return jsonify({
+        'message': 'Evaluasi telah direset',
+        'resetData': reset_data  # Mengembalikan data yang sudah di-reset
+    })

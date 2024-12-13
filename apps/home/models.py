@@ -39,3 +39,19 @@ class Ayat(db.Model):
 
     def __repr__(self):
         return f'<SearchAyat {self.nomor_ayat}>'
+
+from sqlalchemy.dialects.sqlite import JSON  # Gunakan JSON untuk menyimpan array
+
+class Evaluation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    query = db.Column(db.String(255), nullable=False)
+    tipe = db.Column(db.Float, nullable=False)
+    relevance = db.Column(db.Text, nullable=False)
+    precision_array = db.Column(JSON, nullable=False)  # Array JSON untuk precision
+    recall_array = db.Column(JSON, nullable=False)     # Array JSON untuk recall
+    f1_score_array = db.Column(JSON, nullable=False)   # Array JSON untuk F1-Score
+    precision_final = db.Column(db.Float, nullable=False)  # Nilai akhir untuk precision
+    recall_final = db.Column(db.Float, nullable=False)     # Nilai akhir untuk recall
+    f1_score_final = db.Column(db.Float, nullable=False)   # Nilai akhir untuk F1-Score
+    map = db.Column(db.Float, nullable=False)
+    ndcg = db.Column(db.Float, nullable=False)

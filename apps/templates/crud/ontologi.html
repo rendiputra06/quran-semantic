@@ -1,0 +1,97 @@
+{% extends "layouts/public.html" %} {% block title %} Al - Quran {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+  <div class="card">
+    <div class="card-header">
+      <h5>Ontologi</h5>
+    </div>
+    <div class="card-body">
+      <div class="mb-2">
+        <button id="load_data" class="btn btn-primary">
+          Reload Data
+        </button>
+        <button
+          id="clearSubcategoriesBtn"
+          class="btn btn-secondary"
+        >
+          Clear Subcategories
+        </button>
+        <div class="row" id="kategori-data">
+          <div class="col-sm-3" data-level="1">
+            <div class="card">
+              <div class="card-header">
+                <h5>Kategori</h5>
+              </div>
+              <ul
+                id="main-ul"
+                class="list-group list-group-flush kategoris"
+              ></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="tampilModal"
+    tabindex="-1"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Ayat</h5>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock content %}
+
+  <!-- Specific Page JS goes HERE  -->
+  {% block javascripts %}
+  <script src="{{ config.ASSETS_ROOT }}/js/kategori.js"></script>
+  <script>
+    $(document).ready(function () {
+      load_data();
+      $(document).on("click", ".kategoris li a", function () {
+        const parentId = $(this).data("id");
+        const container = $(this).closest(".col-sm-3");
+        const parent_name = $(this).text();
+        const ayat = $(this).data("ayat");
+        if (ayat == "1") {
+          tampilkanAyat(parentId);
+        } else {
+          load_subcategories(parentId, container, parent_name);
+        }
+      });
+      $(document).on("click", ".kategoris li button", function () {
+        let parent_id = $(this).data("parent");
+        $('#addForm select[name="parent_id"]').val(parent_id);
+        $("#exampleModal").modal("show");
+      });
+      $(document).on("click", "table#hasill .lihat-ayat", function () {
+        let value = $(this).data("value");
+        tampilkanAyat(value);
+        console.log(value);
+      });
+    });
+  </script>
+  {% endblock javascripts %}
